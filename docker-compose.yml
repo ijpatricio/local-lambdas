@@ -1,0 +1,41 @@
+version: '3.7'
+
+volumes:
+  dynamodb-data:
+
+networks:
+  web:
+
+services:
+  app:
+    build:
+      dockerfile: docker/app.Dockerfile
+      context: .
+    image: local-lambdas
+    volumes:
+      - .:/app
+    networks:
+      - web
+    ports:
+      - "3000:3000"
+
+  dynamodb:
+    image:  amazon/dynamodb-local
+    hostname: dynamodb
+    networks:
+      - web
+    volumes:
+      -  dynamodb-data:/home/dynamodblocal/data
+    ports:
+      - "8000:8000"
+#    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal/data/"
+
+  dynamodb-gui:
+    build:
+      dockerfile: docker/dynamodb-gui.Dockerfile
+      context: .
+    image: our-dynamodb-gui
+    networks:
+      - web
+    ports:
+      - "8001:8001"
